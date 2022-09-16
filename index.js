@@ -43,12 +43,17 @@ const unpinByHash = async (hash) => {
 const listOfPins = async () => {
   const filters = {
     status: 'pinned',
-    pageLimit: 20,
+    pageLimit: 10,
   };
   try {
     console.log('Unpinning pinned files in progress...');
     var list = await pinata.pinList(filters);
     console.log(list.count);
+    if (list.count === 0) {
+      console.log('Stopping cron job. All files have been unpined...');
+      cronJ1.stop();
+      process.exit(0);
+    }
     var pins = list.rows.map((t) => t.ipfs_pin_hash);
     pins.forEach(async (p) => {
       await unpinByHash(p);
